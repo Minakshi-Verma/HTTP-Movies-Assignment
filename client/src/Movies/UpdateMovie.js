@@ -1,13 +1,33 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import {useParams, useHistory} from 'react-router-dom'
+import axios from 'axios';
 
-const UpdateMovie = () => {
+const UpdateMovie = ({movieList, setMovieList}) => {
  const [updateMovie, setUpdateMovie] = useState({
     id: "",
     title: "",
     director: "",
     metascore: "",
-    stars:  [] 
+    stars:[] 
  }) 
+const {id} = useParams()
+const history = useHistory()
+
+
+    //add useeffect hook
+
+    useEffect(()=>{
+    console.log("I am an array to find the item in but I am empty outside the useEffect hook", movieList)
+
+    const movieToUpdate = movieList && movieList.find(
+    item =>`${item.id}` === id)
+
+    console.log(movieToUpdate)
+    if(movieToUpdate){
+    setUpdateMovie(movieToUpdate)
+    }
+    
+    },[movieList, id])
 
  const handleChanges=(e)=>{
  setUpdateMovie({...updateMovie,[e.target.name]:e.target.value})
@@ -15,13 +35,22 @@ const UpdateMovie = () => {
 
  const handleSubmit = (e) => {
      e.preventDefault()
-     //update the chosern movie based on id
+     //update the chosen movie based on id
+     axios
+     .put(`http://localhost:5000/api/movies/${id}`,updateMovie)
+     
+     .then(res=>{
+         console.log("hey",res)
+         setMovieList(res.data)
+        history.push('/')})
+     .catch(err=>console.log(err))
  }
 
     return(
         <div>
-            <h2>updated movieList</h2>
-            <form onSubmit ={handleSubmit}>
+            
+            <form className ="form" onSubmit ={handleSubmit}>
+                
             <div>
                 <input 
                 type ="number"
@@ -67,7 +96,7 @@ const UpdateMovie = () => {
                 onChange = {handleChanges}                
                 />
             </div>
-            <button>update movie</button>
+            <button className="button">update movie</button>
             </form>
         </div>
     )
